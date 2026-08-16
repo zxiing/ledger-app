@@ -1,4 +1,12 @@
 node_modules/
 tools/qr/
+tools/apkbuild/
 tools/cloudflared.exe
+tools/jdk*/
+tools/android-sdk/
+tools/*.zip
+tools/jdk-listing.html
+tools/yes.txt
+android/build/
+android/ledger.keystore
 *.log

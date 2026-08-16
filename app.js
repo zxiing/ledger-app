@@ -382,15 +382,20 @@ function addCustomCat() {
 
 /* ================= 数据导入导出 ================= */
 function exportData() {
+  const d = new Date();
+  const fname = '记账备份-' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.json';
   const data = {
     app: 'ledger', version: 2, exportedAt: new Date().toISOString(),
     records, settings
   };
+  if (window.Android && window.Android.saveBackup) {   // 安卓 APK：原生保存到下载目录
+    window.Android.saveBackup(fname, JSON.stringify(data, null, 2));
+    return;
+  }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  const d = new Date();
-  a.download = '记账备份-' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.json';
+  a.download = fname;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 3000);
   toast('备份已导出 ⬇️');
