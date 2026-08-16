@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4f7cff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="记账本">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+<title>记账本</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header>
+  <div class="h-top">
+    <div class="month-pill">
+      <button id="prevM" aria-label="上月">‹</button>
+      <span id="monthLabel"></span>
+      <button id="nextM" aria-label="下月">›</button>
+    </div>
+    <div class="ring" id="budgetRing" style="display:none">
+      <svg width="76" height="76" viewBox="0 0 76 76">
+        <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="7"/>
+        <circle id="ringBar" cx="38" cy="38" r="30" fill="none" stroke="#fff" stroke-width="7"
+                stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                transform="rotate(-90 38 38)"/>
+      </svg>
+      <div class="ring-txt" id="ringTxt">0%</div>
+    </div>
+    <button class="budget-chip" id="setBudgetChip">🎯 设置月预算</button>
+  </div>
+  <div class="h-total" id="totalOut">¥0.00</div>
+  <div class="h-sub" id="totalSub"></div>
+</header>
+
+<div class="page" id="page-list"></div>
+
+<div class="page" id="page-chart" style="display:none"></div>
+
+<div class="page" id="page-me" style="display:none">
+  <div class="card">
+    <h3>🎯 月预算</h3>
+    <div class="set-row">
+      <input type="number" inputmode="decimal" id="budgetInput" placeholder="输入每月支出预算，如 3000">
+      <button class="btn-mini" id="budgetSave">保存</button>
+    </div>
+    <div class="set-tip" id="budgetTip"></div>
+  </div>
+
+  <div class="card">
+    <h3>🎨 外观</h3>
+    <div class="seg3" id="themeSeg">
+      <button data-v="auto">跟随系统</button>
+      <button data-v="light">浅色</button>
+      <button data-v="dark">深色</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📂 数据</h3>
+    <p class="set-tip">数据仅保存在本机浏览器中，建议定期导出备份；换设备时可用备份文件恢复。</p>
+    <div class="btn-col">
+      <button class="btn-line" id="exportBtn">⬇️ 导出备份文件</button>
+      <button class="btn-line" id="importBtn">⬆️ 从备份恢复</button>
+      <button class="btn-line danger" id="clearBtn">🗑️ 清空所有数据</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+  </div>
+
+  <div class="card" id="installCard" style="display:none">
+    <h3>📲 安装到桌面</h3>
+    <p class="set-tip">安装后可从桌面图标全屏打开，无需浏览器地址栏。</p>
+    <button class="btn-mini big" id="installBtn">立即安装</button>
+  </div>
+
+  <div class="card about">
+    <h3>记账本 v2.0</h3>
+    <p class="set-tip">纯本地记账应用，无账号、无联网上报，简单安心。</p>
+  </div>
+</div>
+
+<button class="fab" id="fab" aria-label="记一笔">＋</button>
+
+<nav>
+  <button data-tab="list" class="active"><span class="nb">📒</span>明细</button>
+  <button data-tab="chart"><span class="nb">📊</span>图表</button>
+  <button data-tab="me"><span class="nb">⚙️</span>设置</button>
+</nav>
+
+<div class="mask" id="mask"></div>
+
+<div class="sheet" id="sheet">
+  <div class="sh-head">
+    <h2 id="sheetTitle">记一笔</h2>
+    <button class="close-x" id="sheetClose">✕</button>
+  </div>
+  <div class="seg2" id="typeSeg">
+    <button data-v="out" class="active">支出</button>
+    <button data-v="in">收入</button>
+  </div>
+  <div class="amt-row">
+    <span class="amt-cur">¥</span><span class="amt-num" id="amtShow">0.00</span>
+  </div>
+  <div class="sh-mid">
+    <div class="cats" id="catGrid"></div>
+    <div class="f-row">
+      <input type="text" id="fNote" placeholder="备注（选填）" maxlength="30">
+      <input type="date" id="fDate">
+    </div>
+  </div>
+  <div class="pad" id="pad">
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+    <button data-k=".">.</button><button data-k="0">0</button><button data-k="back" class="bk">⌫</button>
+  </div>
+  <div class="acts">
+    <button class="btn-ghost" id="againBtn">再记一笔</button>
+    <button class="btn-main" id="saveBtn">保存</button>
+  </div>
+  <button class="del-link" id="delBtn" style="display:none">删除这条记录</button>
+</div>
+
+<div class="cat-modal" id="catModal">
+  <div class="cm-box">
+    <h3>添加分类</h3>
+    <div class="cm-emojis" id="cmEmojis"></div>
+    <div class="set-row">
+      <input type="text" id="cmName" placeholder="分类名称" maxlength="6">
+      <button class="btn-mini" id="cmAdd">添加</button>
+    </div>
+    <button class="close-x" id="cmClose">✕</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="./app.js"></script>
+</body>
+</html>
