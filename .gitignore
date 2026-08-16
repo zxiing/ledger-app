@@ -1,0 +1,4 @@
+node_modules/
+tools/qr/
+tools/cloudflared.exe
+*.log
